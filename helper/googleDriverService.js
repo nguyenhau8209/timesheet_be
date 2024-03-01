@@ -1,6 +1,6 @@
 import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
-
+import fs from "fs";
 class GoogleDriveService {
   constructor(clientId, clientSecret, redirectUri, refreshToken) {
     this.driveClient = this.createDriveClient(
@@ -61,6 +61,26 @@ class GoogleDriveService {
         body: fs.createReadStream(filePath),
       },
     });
+  }
+
+  async generatePublicUrl(fileId) {
+    try {
+      this.driveClient.permissions.create({
+        fileId: fileId,
+        requestBody: {
+          role: "reader",
+          type: "anyone",
+        },
+      });
+      const result = await this.driveClient.files.get({
+        fileId: fileId,
+        fields: "webViewLink, webContentLink",
+      });
+
+      return result.data;
+    } catch (error) {
+      return error?.message;
+    }
   }
 }
 

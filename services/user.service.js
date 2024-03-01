@@ -5,6 +5,7 @@ import helperApp from "../helper/helper.js";
 import nodeMailerLib from "../helper/nodemailer.js";
 import userRepo from "../repositories/auth.repo.js";
 import dotenv from "dotenv";
+import fs from "fs";
 dotenv.config();
 const login = async (data) => {
   console.log("login is RUNNING");
@@ -47,7 +48,6 @@ const signup = async (data, file) => {
   const clientSecret = process.env.CLIENT_SECRET;
   const redirectUri = "https://developers.google.com/oauthplayground";
   const refreshToken = process.env.REFRESH_TOKEN;
-
   const driveService = new GoogleDriveService(
     clientId,
     clientSecret,
@@ -55,29 +55,6 @@ const signup = async (data, file) => {
     refreshToken
   );
   try {
-    const folderName = "TimeSheetImage";
-    // Tìm hoặc tạo thư mục trên Google Drive
-    let folder = await driveService.searchFolder(folderName);
-    if (!folder) {
-      folder = await driveService.createFolder(folderName);
-    }
-    console.log(folder?.id);
-    const fileMetaData = {
-      name: Date.now() + "-" + file?.originalname,
-      mimeType: file?.mimetype,
-      parents: [folder?.id],
-    };
-
-    const media = {
-      mimeType: file.mimeType,
-      body: file.buffer,
-    };
-
-    const response = await driveService.driveClient.files.create({
-      requestBody: fileMetaData,
-      media: media,
-    });
-    console.log("File uploaded successfully:", response.data);
     const { email, password, fullName } = data;
     // verify data
     if (!email || !password || !fullName) {
@@ -94,11 +71,35 @@ const signup = async (data, file) => {
     if (oldUser) {
       await userRepo.deleteUser({ email });
     }
+    const folderName = "TimeSheetImage";
+    // Tìm hoặc tạo thư mục trên Google Drive
+    let folder = await driveService.searchFolder(folderName);
+    if (!folder) {
+      folder = await driveService.createFolder(folderName);
+    }
+    console.log(folder?.id);
+    console.log(file?.path);
+    const response = await driveService
+      .saveFile(
+        Date.now() + "-" + file?.originalname,
+        file?.path,
+        file?.mimetype,
+        folder?.id
+      )
+      .catch((e) => console.log(e));
+    // Lấy link của file từ phản hồi
+    // const fileLink = response.data.webViewLink || response.data.webContentLink;
+
+    // console.log("File link:", fileLink);
+    console.log("response ", response);
+    console.log("File uploaded successfully:", response.data);
+    const imageUrl = await driveService.generatePublicUrl(response.data?.id);
+    console.log(imageUrl);
     const newUser = await userRepo.createUser({
       email,
       password: await helperApp.hashPW(password),
       fullName,
-      avatar: file?.filename,
+      avatar: imageUrl.webViewLink,
       status: 1,
     });
 
@@ -114,6 +115,7 @@ const signup = async (data, file) => {
     });
 
     console.log("---out---");
+
     return {
       code: HTTP_CODE.created,
       data: token,
