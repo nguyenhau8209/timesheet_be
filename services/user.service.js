@@ -1,9 +1,11 @@
 import HTTP_CODE from "../constants/httpResponseCode.js";
+import GoogleDriveService from "../helper/googleDriverService.js";
 import { handleReturn } from "../helper/handleReturn.js";
 import helperApp from "../helper/helper.js";
 import nodeMailerLib from "../helper/nodemailer.js";
 import userRepo from "../repositories/auth.repo.js";
-
+import dotenv from "dotenv";
+dotenv.config();
 const login = async (data) => {
   console.log("login is RUNNING");
   try {
@@ -39,8 +41,43 @@ const login = async (data) => {
 };
 
 const signup = async (data, file) => {
+  console.log("file ", file);
   console.log("sign up RUNNING");
+  const clientId = process.env.CLIENT_ID;
+  const clientSecret = process.env.CLIENT_SECRET;
+  const redirectUri = "https://developers.google.com/oauthplayground";
+  const refreshToken = process.env.REFRESH_TOKEN;
+
+  const driveService = new GoogleDriveService(
+    clientId,
+    clientSecret,
+    redirectUri,
+    refreshToken
+  );
   try {
+    const folderName = "TimeSheetImage";
+    // Tìm hoặc tạo thư mục trên Google Drive
+    let folder = await driveService.searchFolder(folderName);
+    if (!folder) {
+      folder = await driveService.createFolder(folderName);
+    }
+    console.log(folder?.id);
+    const fileMetaData = {
+      name: Date.now() + "-" + file?.originalname,
+      mimeType: file?.mimetype,
+      parents: [folder?.id],
+    };
+
+    const media = {
+      mimeType: file.mimeType,
+      body: file.buffer,
+    };
+
+    const response = await driveService.driveClient.files.create({
+      requestBody: fileMetaData,
+      media: media,
+    });
+    console.log("File uploaded successfully:", response.data);
     const { email, password, fullName } = data;
     // verify data
     if (!email || !password || !fullName) {

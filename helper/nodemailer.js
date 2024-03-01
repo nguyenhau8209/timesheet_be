@@ -13,8 +13,7 @@ const nodeMailerLib = async ({ to, subject, text, from }, callback) => {
       user: process.env.EMAIL,
       clientId: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      refreshToken:
-        "1//04IctbJ68nGzGCgYIARAAGAQSNwF-L9IryF_OHerRbeXOc0Z2HEdMVfqnwLRoL9-Vm2wxfXvW4dC74M0nE3L2hnZZ0hiXMNdCvnc",
+      refreshToken: process.env.REFRESH_TOKEN,
       accessToken: accessToken,
     },
   });
@@ -27,7 +26,7 @@ const nodeMailerLib = async ({ to, subject, text, from }, callback) => {
     </div>`,
     from,
   };
-  console.log("transporter ", transporter);
+  // console.log("transporter ", transporter);
   await transporter.sendMail(mailOptions, callback);
 };
 
