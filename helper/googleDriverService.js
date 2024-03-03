@@ -82,6 +82,12 @@ class GoogleDriveService {
       return error?.message;
     }
   }
+
+  deleteFile(fileId) {
+    return this.driveClient.files.delete({
+      fileId: fileId,
+    });
+  }
 }
 
 export default GoogleDriveService;

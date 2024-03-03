@@ -27,7 +27,7 @@ const login = async (data) => {
     const userCopy = JSON.parse(JSON.stringify(user));
     delete userCopy.password;
     //xoa bo truong password de khong tra ve
-    console.log(userCopy);
+
     return {
       code: HTTP_CODE.success,
       data: {
@@ -77,8 +77,7 @@ const signup = async (data, file) => {
     if (!folder) {
       folder = await driveService.createFolder(folderName);
     }
-    console.log(folder?.id);
-    console.log(file?.path);
+
     const response = await driveService
       .saveFile(
         Date.now() + "-" + file?.originalname,
@@ -87,14 +86,9 @@ const signup = async (data, file) => {
         folder?.id
       )
       .catch((e) => console.log(e));
-    // Lấy link của file từ phản hồi
-    // const fileLink = response.data.webViewLink || response.data.webContentLink;
 
-    // console.log("File link:", fileLink);
-    console.log("response ", response);
-    console.log("File uploaded successfully:", response.data);
     const imageUrl = await driveService.generatePublicUrl(response.data?.id);
-    console.log(imageUrl);
+
     const newUser = await userRepo.createUser({
       email,
       password: await helperApp.hashPW(password),
