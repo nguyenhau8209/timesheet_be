@@ -71,29 +71,35 @@ const signup = async (data, file) => {
     if (oldUser) {
       await userRepo.deleteUser({ email });
     }
-    const folderName = "TimeSheetImage";
-    // Tìm hoặc tạo thư mục trên Google Drive
-    let folder = await driveService.searchFolder(folderName);
-    if (!folder) {
-      folder = await driveService.createFolder(folderName);
+    //Tai anh len driver
+    let imageUrl;
+    if (file) {
+      const folderName = "TimeSheetImage";
+      // Tìm hoặc tạo thư mục trên Google Drive
+      let folder = await driveService.searchFolder(folderName);
+      if (!folder) {
+        folder = await driveService.createFolder(folderName);
+      }
+
+      const response = await driveService
+        .saveFile(
+          Date.now() + "-" + file?.originalname,
+          file?.path,
+          file?.mimetype,
+          folder?.id
+        )
+        .catch((e) => console.log(e));
+
+      imageUrl = await driveService.generatePublicUrl(response.data?.id);
     }
-
-    const response = await driveService
-      .saveFile(
-        Date.now() + "-" + file?.originalname,
-        file?.path,
-        file?.mimetype,
-        folder?.id
-      )
-      .catch((e) => console.log(e));
-
-    const imageUrl = await driveService.generatePublicUrl(response.data?.id);
 
     const newUser = await userRepo.createUser({
       email,
       password: await helperApp.hashPW(password),
       fullName,
-      avatar: imageUrl.webViewLink,
+      avatar: imageUrl
+        ? imageUrl.webViewLink
+        : "https://cdn.sforum.vn/sforum/wp-content/uploads/2023/10/avatar-trang-2.jpg",
       status: 1,
     });
 
