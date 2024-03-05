@@ -1,4 +1,4 @@
-import Location from "../models/location.model";
+import Location from "../models/location.model.js";
 const createLocation = async ({ locationName }) => {
   return await Location.create({ locationName });
 };

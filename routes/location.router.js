@@ -11,3 +11,5 @@ locationRouter.post(
   locationValidation,
   locationController.createLocation
 );
+locationRouter.get("/", locationController.getAllLocation);
+locationRouter.get("/:id", locationController.getLocation);
