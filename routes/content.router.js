@@ -10,6 +10,6 @@ contentRouter.post(
 );
 contentRouter.get("/", contentController.getAllContent);
 contentRouter.get("/:id", contentController.getContent);
-contentRouter.delete("/:id", contentController.deleteContent);
-contentRouter.put("/:id", contentController.updateContent);
+contentRouter.delete("/delete/:id", contentController.deleteContent);
+contentRouter.put("/update/:id", contentController.updateContent);
 export default contentRouter;

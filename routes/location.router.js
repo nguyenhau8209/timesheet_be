@@ -13,3 +13,5 @@ locationRouter.post(
 );
 locationRouter.get("/", locationController.getAllLocation);
 locationRouter.get("/:id", locationController.getLocation);
+locationRouter.put("/update/:id", locationController.updateLocation);
+locationRouter.delete("/delete/:id", locationController.deleteLocation);

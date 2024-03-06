@@ -48,9 +48,39 @@ const getAllLocation = async (req, res) => {
       .json({ message: `Error in ${error?.message}` });
   }
 };
+
+const deleteLocation = async (req, res) => {
+  try {
+    const data = await locationService.deleteLocation(req.params);
+    if (data?.error) {
+      return res.status(data?.code).json({ message: data?.message });
+    }
+    return res.status(data?.code).json({ message: data?.message });
+  } catch (error) {
+    return res
+      .status(HTTP_CODE.errorServer)
+      .json({ message: `Error in ${error?.message}` });
+  }
+};
+
+const updateLocation = async (req, res) => {
+  try {
+    const data = await locationService.updateLocation(req.params, req.body);
+    if (data?.error) {
+      return res.status(data?.code).json({ message: data?.message });
+    }
+    return res.status(data?.code).json({ message: data?.message });
+  } catch (error) {
+    return res
+      .status(HTTP_CODE.errorServer)
+      .json({ message: `Error in ${error?.message}` });
+  }
+};
 const locationController = {
   createLocation,
   getLocation,
   getAllLocation,
+  updateLocation,
+  deleteLocation,
 };
 export default locationController;

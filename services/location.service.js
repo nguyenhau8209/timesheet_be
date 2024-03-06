@@ -80,10 +80,68 @@ const getAllLocation = async () => {
     );
   }
 };
+const deleteLocation = async (data) => {
+  try {
+    const { id } = data;
+    const findLocationById = await locationRepo.getLocationById({ _id: id });
+    if (!findLocationById) {
+      return handleReturn(true, HTTP_CODE.notFound, "Không tìm thấy địa điểm");
+    }
+    const deleteLocation = await locationRepo.deleteLocation({ _id: id });
+    if (!deleteLocation) {
+      return handleReturn(
+        true,
+        HTTP_CODE.badRequest,
+        "Xóa địa điểm không thành công"
+      );
+    }
+    return handleReturn(false, HTTP_CODE.success, "Xóa địa điểm thành công");
+  } catch (error) {
+    return handleReturn(
+      true,
+      HTTP_CODE.errorServer,
+      `Error in ${error?.message}`
+    );
+  }
+};
+
+const updateLocation = async (id_location, data) => {
+  try {
+    const { id } = id_location;
+    const findLocationById = await locationRepo.getLocationById({ _id: id });
+    if (!findLocationById) {
+      return handleReturn(true, HTTP_CODE.notFound, "Không tìm thấy địa điểm");
+    }
+    const updateContent = await locationRepo.updateLocation(
+      { _id: id },
+      { ...data }
+    );
+    if (!updateContent) {
+      return handleReturn(
+        true,
+        HTTP_CODE.badRequest,
+        "Cập nhật địa điểm không thành công"
+      );
+    }
+    return handleReturn(
+      false,
+      HTTP_CODE.success,
+      "Cập nhật địa điểm thành công"
+    );
+  } catch (error) {
+    return handleReturn(
+      true,
+      HTTP_CODE.errorServer,
+      `Error in ${error?.message}`
+    );
+  }
+};
 const locationService = {
   createLocation,
   getLocation,
   getAllLocation,
+  deleteLocation,
+  updateLocation,
 };
 
 export default locationService;
